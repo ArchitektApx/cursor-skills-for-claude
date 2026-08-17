@@ -1,0 +1,12 @@
+{
+  "name": "thermos",
+  "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ArchitektApx",
+    "url": "https://github.com/ArchitektApx"
+  },
+  "homepage": "https://github.com/ArchitektApx/cursor-skills-for-claude",
+  "repository": "https://github.com/ArchitektApx/cursor-skills-for-claude",
+  "license": "MIT"
+}

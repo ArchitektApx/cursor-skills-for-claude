@@ -1,0 +1,7 @@
+{
+  "upstream": "https://github.com/cursor/plugins",
+  "ref": "main",
+  "commit": "2a8044425c7bddf429c3bdedf3ab61e791d34d65",
+  "committedAt": "2026-08-13T14:59:08-07:00",
+  "syncedFrom": "2a8044425c7bddf429c3bdedf3ab61e791d34d65"
+}

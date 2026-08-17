@@ -1,0 +1,22 @@
+{
+  "name": "cursor-skills-for-claude",
+  "owner": {
+    "name": "ArchitektApx",
+    "url": "https://github.com/ArchitektApx"
+  },
+  "metadata": {
+    "description": "Cursor's official agent skills, repackaged as installable Claude Code plugins. Generated from cursor/plugins, kept in sync automatically."
+  },
+  "plugins": [
+    {
+      "name": "cursor-team-kit",
+      "source": "./plugins/cursor-team-kit",
+      "description": "Internal team workflows for CI, code review, shipping, local automation, and verification. Repackaged from cursor/plugins."
+    },
+    {
+      "name": "thermos",
+      "source": "./plugins/thermos",
+      "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "upstream": {
+    "repo": "https://github.com/cursor/plugins",
+    "ref": "main"
+  },
+  "marketplace": {
+    "name": "cursor-skills-for-claude",
+    "owner": {
+      "name": "ArchitektApx",
+      "url": "https://github.com/ArchitektApx"
+    },
+    "repository": "https://github.com/ArchitektApx/cursor-skills-for-claude",
+    "description": "Cursor's official agent skills, repackaged as installable Claude Code plugins. Generated from cursor/plugins, kept in sync automatically."
+  },
+  "plugins": [
+    {
+      "name": "cursor-team-kit",
+      "upstreamPath": "cursor-team-kit",
+      "description": "Internal team workflows for CI, code review, shipping, local automation, and verification. Repackaged from cursor/plugins.",
+      "mirror": true,
+      "skills": [
+        "check-compiler-errors",
+        "control-cli",
+        "control-ui",
+        "deslop",
+        "fix-ci",
+        "fix-merge-conflicts",
+        "get-pr-comments",
+        "loop-on-ci",
+        "make-pr-easy-to-review",
+        "new-branch-and-pr",
+        "pr-review-canvas",
+        "review-and-ship",
+        "run-smoke-tests",
+        "thermo-nuclear-code-quality-review",
+        "verify-this",
+        "weekly-review",
+        "what-did-i-get-done",
+        "workflow-from-chats"
+      ],
+      "agents": [
+        "ci-watcher.md",
+        "thermo-nuclear-code-quality-review.md"
+      ],
+      "rewrites": [
+        {
+          "skill": "workflow-from-chats",
+          "file": "SKILL.md",
+          "from": "recent Cursor chats",
+          "to": "recent agent chats",
+          "reason": "The skill works against any agent's transcripts, not only Cursor's."
+        }
+      ]
+    },
+    {
+      "name": "thermos",
+      "upstreamPath": "thermos",
+      "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins.",
+      "mirror": false,
+      "skills": [
+        "thermos",
+        "thermo-nuclear-review",
+        "thermo-nuclear-code-quality-review"
+      ],
+      "agents": [
+        "thermo-nuclear-review-subagent.md",
+        "thermo-nuclear-code-quality-review-subagent.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+This repository redistributes agent skills and subagent definitions from
+Cursor's official plugin repository:
+
+    https://github.com/cursor/plugins
+
+All skill and agent content is copyright (c) 2026 Cursor and licensed under the
+MIT License. Per-plugin LICENSE files from upstream are preserved verbatim
+under plugins/<plugin>/LICENSE.
+
+No skill or agent content is authored here. The only original work in this
+repository is the packaging layer: sync.config.json, scripts/sync.mjs, the
+GitHub Actions workflows, and this documentation. That layer is likewise MIT
+licensed.
+
+Content is transformed only where a Cursor-specific construct has no Claude
+Code equivalent, or where agent-specific wording would mislead users of other
+agents. The transformations are enumerated in README.md and implemented in
+scripts/sync.mjs.
+
+This repository is not affiliated with or endorsed by Cursor or Anysphere.

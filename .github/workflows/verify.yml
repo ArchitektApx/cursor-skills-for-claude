@@ -1,0 +1,64 @@
+name: Verify
+
+# pull_request, never pull_request_target: this checks out and runs code from
+# the PR head, so it must not have write access or secrets.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+
+      # Offline checks: every allowlisted skill and agent exists, the flat
+      # mirror is byte-identical to its canonical plugin copy, and nothing
+      # undeclared has crept into skills/.
+      - name: Verify generated tree
+        run: node scripts/sync.mjs --verify
+
+      - name: Validate JSON manifests
+        run: |
+          shopt -s nullglob
+          for f in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json sync.config.json; do
+            node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" || exit 1
+          done
+
+      - name: Check every skill has frontmatter
+        run: |
+          rc=0
+          while IFS= read -r f; do
+            head -n 1 "$f" | grep -qx -- '---' || { echo "missing frontmatter: $f"; rc=1; }
+            grep -qE '^name:' "$f" || { echo "missing name: $f"; rc=1; }
+            grep -qE '^description:' "$f" || { echo "missing description: $f"; rc=1; }
+          done < <(find plugins skills -name SKILL.md)
+          exit $rc
+
+      # Nothing upstream ships today needs either, and both are awkward to
+      # audit once they are inside a redistributed skill.
+      - name: Reject symlinks and executables
+        run: |
+          rc=0
+          while IFS= read -r entry; do
+            mode=${entry%% *}
+            case "$mode" in
+              120000) echo "symlink in generated tree: ${entry#* }"; rc=1 ;;
+              100755) echo "executable in generated tree: ${entry#* }"; rc=1 ;;
+            esac
+          done < <(git ls-files -s plugins skills | awk '{print $1" "$4}')
+          exit $rc
