@@ -55,6 +55,7 @@ function sync() {
 
     writeMarketplace()
     writeReadmeCatalog(catalog)
+    writeAgentsMirror()
     writeJson(STATE_FILE, {
       upstream: CONFIG.upstream.repo,
       ref: CONFIG.upstream.ref,
@@ -208,6 +209,14 @@ function readSkillCatalog(plugin, src) {
   }
 
   return rows.filter((r) => plugin.skills.includes(r.name))
+}
+
+// Agents that read AGENTS.md rather than CLAUDE.md should get the same context.
+// A copy rather than a symlink: GitHub renders a symlinked markdown file as a
+// path stub, and a Windows checkout without symlink support turns it into a
+// one-line file containing the target path.
+function writeAgentsMirror() {
+  fs.copyFileSync(path.join(ROOT, 'CLAUDE.md'), path.join(ROOT, 'AGENTS.md'))
 }
 
 // Upstream README prose lands inside our own README, so neutralize the
@@ -369,6 +378,14 @@ function verify() {
 }
 
 function verifyMirrors() {
+  const claude = path.join(ROOT, 'CLAUDE.md')
+  const agents = path.join(ROOT, 'AGENTS.md')
+  if (!fs.existsSync(agents)) {
+    problems.push('AGENTS.md missing — run the sync')
+  } else if (!fs.readFileSync(agents).equals(fs.readFileSync(claude))) {
+    problems.push('AGENTS.md differs from CLAUDE.md — edit CLAUDE.md and run the sync')
+  }
+
   const mirrored = new Set()
   for (const plugin of CONFIG.plugins.filter((p) => p.mirror)) {
     for (const skill of plugin.skills) {
