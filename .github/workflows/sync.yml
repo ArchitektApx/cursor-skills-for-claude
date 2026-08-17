@@ -18,6 +18,8 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # A hung clone would otherwise sit on a runner for the default six hours.
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write
