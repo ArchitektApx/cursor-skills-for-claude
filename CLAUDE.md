@@ -81,6 +81,14 @@ changed in a way the config no longer describes. Fix the config, or accept the
 upstream change deliberately. Keep the sync failing on anything it fails on
 today.
 
+The sync also reports every path in an upstream plugin directory the config does
+not name, whether that is an unallowlisted skill, an unallowlisted agent, or a
+new top-level file or directory. `assets/` and `rules/` are deliberately skipped
+and stay unreported: nothing references the imagery, and Cursor `.mdc` rules have
+no Claude Code equivalent. A reported path opens a PR on its own, even when
+nothing vendored changed, and it is announced once. Merge that PR without acting
+on it and the next run has nothing left to commit, so the notice does not return.
+
 ## Invariants
 
 Preserve these through any refactor of `.github/workflows/`:

@@ -23,6 +23,26 @@ const MARKETPLACE_FILE = path.join(ROOT, '.claude-plugin', 'marketplace.json')
 const AGENT_MODEL_MAP = { fast: 'haiku', max: 'opus', smart: 'sonnet' }
 const AGENT_DROP_KEYS = new Set(['is_background'])
 
+// Top-level entries of an upstream plugin directory that the unvendored scan
+// has nothing to say about. Two different reasons, kept apart so neither reads
+// as the other.
+
+// Consumed elsewhere in this file, so reporting them here would only flag the
+// containers the skill and agent scans just walked.
+const HANDLED_PLUGIN_ENTRIES = new Set([
+  'skills',
+  'agents',
+  '.cursor-plugin',
+  'README.md',
+  'LICENSE',
+  'CHANGELOG.md',
+])
+
+// Deliberately not vendored, and not up for review on every sync. `assets` is
+// README imagery no skill, agent or README references; `rules` is Cursor `.mdc`
+// rule files with no Claude Code equivalent. Nothing copies either one.
+const IGNORED_PLUGIN_ENTRIES = new Set(['assets', 'rules'])
+
 const problems = []
 
 if (process.argv.includes('--verify')) {
@@ -77,8 +97,8 @@ function sync() {
     emitStepOutput('extras', extras.length)
     console.log(`\nSynced ${CONFIG.plugins.length} plugins from ${upstream.commit.slice(0, 12)}.`)
     if (extras.length) {
-      console.log(`\n${extras.length} upstream skill(s) not in the allowlist:`)
-      for (const e of extras) console.log(`  ${e.plugin}/${e.skill}`)
+      console.log(`\n${extras.length} upstream path(s) this repository does not vendor:`)
+      for (const e of extras) console.log(`  ${e.plugin}/${e.item}`)
     }
   } finally {
     rmrf(tmp)
@@ -173,11 +193,38 @@ function buildPlugin(plugin, upstreamDir) {
     }
   }
 
-  const available = listDirs(path.join(src, 'skills'))
   return {
-    extras: available.filter((s) => !plugin.skills.includes(s)).map((skill) => ({ plugin: plugin.name, skill })),
+    extras: scanUnvendored(plugin, src),
     catalog: readSkillCatalog(plugin, src),
   }
+}
+
+// Upstream decides what sits in a plugin directory, and anything it adds that
+// the config does not name is invisible to everyone downstream unless someone
+// says so. Reported, never fatal: a new upstream file is a decision to make,
+// not a reason to stop syncing the skills that did not change.
+function scanUnvendored(plugin, src) {
+  const found = []
+
+  for (const skill of listDirs(path.join(src, 'skills'))) {
+    if (!plugin.skills.includes(skill)) found.push(`skills/${skill}`)
+  }
+
+  const agentsDir = path.join(src, 'agents')
+  if (fs.existsSync(agentsDir)) {
+    for (const agent of fs.readdirSync(agentsDir)) {
+      if (!(plugin.agents ?? []).includes(agent)) found.push(`agents/${agent}`)
+    }
+  }
+
+  // One level only. A new top-level directory is reported as itself rather than
+  // as every file inside it.
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (HANDLED_PLUGIN_ENTRIES.has(entry.name) || IGNORED_PLUGIN_ENTRIES.has(entry.name)) continue
+    found.push(entry.isDirectory() ? `${entry.name}/` : entry.name)
+  }
+
+  return found.map((item) => ({ plugin: plugin.name, item }))
 }
 
 // Pulls the one-line skill descriptions out of the upstream plugin README's
@@ -444,9 +491,9 @@ function report(upstream, previous, extras) {
   }
 
   if (extras.length) {
-    lines.push('### Upstream skills not in the allowlist', '')
+    lines.push('### Upstream paths this repository does not vendor', '')
     lines.push('Add any you want to `sync.config.json` and re-run the sync.', '')
-    for (const e of extras) lines.push(`- \`${e.plugin}/${e.skill}\``)
+    for (const e of extras) lines.push(`- \`${e.plugin}/${e.item}\``)
     lines.push('')
   }
 
