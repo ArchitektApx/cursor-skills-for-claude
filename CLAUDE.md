@@ -55,10 +55,25 @@ container directories, so it needs a root-level `skills/`. Hence two trees, both
 written by the same generator in the same run, with CI asserting they stay
 byte-identical.
 
-Only plugins with `"mirror": true` reach the flat tree. `thermos` is excluded
-because its skills delegate to subagents, and `npx skills` installs skills only.
-Mirroring them would ship instructions to spawn agents that were never
-delivered.
+Only plugins with `"mirror": true` reach the flat tree. Every plugin vendored
+today mirrors. The flag exists for a plugin whose skills delegate to subagents:
+`npx skills` installs skills only, so mirroring those would ship instructions
+to spawn agents that were never delivered.
+
+## What is deliberately not vendored
+
+Upstream `thermos` is not packaged, and neither is the cursor-team-kit
+`thermo-nuclear-code-quality-review.md` agent. Both agents open with "load the
+`thermo-nuclear-*` skill" and fall back to a rougher inline rubric when they
+cannot. In Claude Code they never can: the rubric skills carry
+`disable-model-invocation: true`, which hides them from the Skill tool, and the
+agents preload nothing. Installed as-is they always ran the fallback while
+claiming the full audit. The rubric skills themselves are self-contained and
+work as slash commands, so cursor-team-kit still ships
+`thermo-nuclear-code-quality-review`. The agent sits in that plugin's `skip`
+list; `thermos` is simply not in the config. Making the agents work would need a
+Claude-specific `skills:` preload injected at sync time; do that before
+allowlisting either again.
 
 ## Running a sync
 
@@ -86,8 +101,10 @@ not name, whether that is an unallowlisted skill, an unallowlisted agent, or a
 new top-level file or directory. `assets/` and `rules/` are deliberately skipped
 and stay unreported: nothing references the imagery, and Cursor `.mdc` rules have
 no Claude Code equivalent. A reported path opens a PR on its own, even when
-nothing vendored changed, and it is announced once. Merge that PR without acting
-on it and the next run has nothing left to commit, so the notice does not return.
+nothing vendored changed. To turn one down for good, list it under the plugin's
+`skip` in `sync.config.json` with a `reason`; otherwise the report, and the PR,
+return on every run. A `skip` whose path vanished upstream fails the sync, since
+the decision it records has nothing left to apply to.
 
 ## Invariants
 

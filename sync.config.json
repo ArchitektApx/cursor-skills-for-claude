@@ -39,8 +39,13 @@
         "workflow-from-chats"
       ],
       "agents": [
-        "ci-watcher.md",
-        "thermo-nuclear-code-quality-review.md"
+        "ci-watcher.md"
+      ],
+      "skip": [
+        {
+          "path": "agents/thermo-nuclear-code-quality-review.md",
+          "reason": "Loads its rubric from a skill that disable-model-invocation hides from the Skill tool, so in Claude Code it always ran the weaker inline fallback while claiming the full audit."
+        }
       ],
       "rewrites": [
         {
@@ -50,21 +55,6 @@
           "to": "recent agent chats",
           "reason": "The skill works against any agent's transcripts, not only Cursor's."
         }
-      ]
-    },
-    {
-      "name": "thermos",
-      "upstreamPath": "thermos",
-      "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins.",
-      "mirror": false,
-      "skills": [
-        "thermos",
-        "thermo-nuclear-review",
-        "thermo-nuclear-code-quality-review"
-      ],
-      "agents": [
-        "thermo-nuclear-review-subagent.md",
-        "thermo-nuclear-code-quality-review-subagent.md"
       ]
     }
   ]
