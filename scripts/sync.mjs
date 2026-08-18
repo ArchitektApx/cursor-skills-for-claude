@@ -23,21 +23,25 @@ const MARKETPLACE_FILE = path.join(ROOT, '.claude-plugin', 'marketplace.json')
 const AGENT_MODEL_MAP = { fast: 'haiku', max: 'opus', smart: 'sonnet' }
 const AGENT_DROP_KEYS = new Set(['is_background'])
 
-// Everything the sync knowingly consumes from an upstream plugin directory,
-// plus what it knowingly leaves behind: `assets` holds README imagery no skill
-// references, and `rules` holds Cursor `.mdc` rule files that have no Claude
-// Code equivalent. Anything outside this set is upstream surface nobody has
-// decided about yet, so it gets reported rather than silently dropped.
-const KNOWN_PLUGIN_ENTRIES = new Set([
+// Top-level entries of an upstream plugin directory that the unvendored scan
+// has nothing to say about. Two different reasons, kept apart so neither reads
+// as the other.
+
+// Consumed elsewhere in this file, so reporting them here would only flag the
+// containers the skill and agent scans just walked.
+const HANDLED_PLUGIN_ENTRIES = new Set([
   'skills',
   'agents',
   '.cursor-plugin',
   'README.md',
   'LICENSE',
   'CHANGELOG.md',
-  'assets',
-  'rules',
 ])
+
+// Deliberately not vendored, and not up for review on every sync. `assets` is
+// README imagery no skill, agent or README references; `rules` is Cursor `.mdc`
+// rule files with no Claude Code equivalent. Nothing copies either one.
+const IGNORED_PLUGIN_ENTRIES = new Set(['assets', 'rules'])
 
 const problems = []
 
@@ -216,7 +220,7 @@ function scanUnvendored(plugin, src) {
   // One level only. A new top-level directory is reported as itself rather than
   // as every file inside it.
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    if (KNOWN_PLUGIN_ENTRIES.has(entry.name)) continue
+    if (HANDLED_PLUGIN_ENTRIES.has(entry.name) || IGNORED_PLUGIN_ENTRIES.has(entry.name)) continue
     found.push(entry.isDirectory() ? `${entry.name}/` : entry.name)
   }
 
