@@ -31,8 +31,9 @@ file.
 its markers, this file, `NOTICE`.
 
 **Generated**, rewritten from scratch on every sync — `plugins/`, `skills/`,
-`.claude-plugin/marketplace.json`, `.sync-state.json`, `AGENTS.md`, and the
-region of `README.md` between `<!-- skills:start -->` and `<!-- skills:end -->`.
+`.claude-plugin/marketplace.json`, `skills.sh.json`, `.sync-state.json`,
+`AGENTS.md`, and the region of `README.md` between `<!-- skills:start -->` and
+`<!-- skills:end -->`.
 
 `AGENTS.md` is a byte-identical copy of this file, so agents that read one or
 the other get the same context. Edit this file; the sync produces the copy and

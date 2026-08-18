@@ -1,0 +1,39 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "cursor-team-kit",
+      "description": "Internal team workflows for CI, code review, shipping, local automation, and verification. Repackaged from cursor/plugins.",
+      "skills": [
+        "check-compiler-errors",
+        "control-cli",
+        "control-ui",
+        "deslop",
+        "fix-ci",
+        "fix-merge-conflicts",
+        "get-pr-comments",
+        "loop-on-ci",
+        "make-pr-easy-to-review",
+        "new-branch-and-pr",
+        "pr-review-canvas",
+        "review-and-ship",
+        "run-smoke-tests",
+        "thermo-nuclear-code-quality-review",
+        "verify-this",
+        "weekly-review",
+        "what-did-i-get-done",
+        "workflow-from-chats"
+      ]
+    },
+    {
+      "title": "thermos",
+      "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins.",
+      "skills": [
+        "thermos",
+        "thermo-nuclear-review",
+        "thermo-nuclear-code-quality-review"
+      ]
+    }
+  ]
+}

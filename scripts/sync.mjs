@@ -17,6 +17,7 @@ const CONFIG = readJson(path.join(ROOT, 'sync.config.json'))
 const STATE_FILE = path.join(ROOT, '.sync-state.json')
 const REPORT_FILE = path.join(ROOT, '.sync-report.md')
 const MARKETPLACE_FILE = path.join(ROOT, '.claude-plugin', 'marketplace.json')
+const SKILLS_SH_FILE = path.join(ROOT, 'skills.sh.json')
 
 // Cursor agent frontmatter keys that Claude Code does not understand.
 // `model: fast` is a Cursor tier name; Claude wants one of its own values.
@@ -74,6 +75,7 @@ function sync() {
     fail('Sync failed')
 
     writeMarketplace()
+    writeSkillsSh()
     writeReadmeCatalog(catalog)
     writeAgentsMirror()
     writeJson(STATE_FILE, {
@@ -400,11 +402,36 @@ function writeMarketplace() {
   })
 }
 
+// skills.sh renders a repository page from the flat skill list `npx skills`
+// discovers, so without this file the plugin boundaries are invisible there.
+// One group per plugin, in config order, so the page reads like the
+// marketplace. Schema: https://skills.sh/schemas/skills.sh.schema.json
+function buildSkillsSh() {
+  return {
+    $schema: 'https://skills.sh/schemas/skills.sh.schema.json',
+    notGrouped: 'bottom',
+    groupings: CONFIG.plugins.map((p) => ({
+      title: p.name,
+      description: p.description,
+      skills: [...p.skills],
+    })),
+  }
+}
+
+function writeSkillsSh() {
+  writeJson(SKILLS_SH_FILE, buildSkillsSh())
+}
+
 // --- verification ------------------------------------------------------------
 
 function verify() {
   if (!fs.existsSync(MARKETPLACE_FILE)) problems.push('.claude-plugin/marketplace.json missing — run the sync')
   if (!fs.existsSync(STATE_FILE)) problems.push('.sync-state.json missing — run the sync')
+  if (!fs.existsSync(SKILLS_SH_FILE)) {
+    problems.push('skills.sh.json missing — run the sync')
+  } else if (fs.readFileSync(SKILLS_SH_FILE, 'utf8') !== JSON.stringify(buildSkillsSh(), null, 2) + '\n') {
+    problems.push('skills.sh.json does not match sync.config.json — run the sync')
+  }
 
   for (const plugin of CONFIG.plugins) {
     for (const skill of plugin.skills) {
