@@ -203,6 +203,11 @@ function buildPlugin(plugin, upstreamDir) {
 // the config does not name is invisible to everyone downstream unless someone
 // says so. Reported, never fatal: a new upstream file is a decision to make,
 // not a reason to stop syncing the skills that did not change.
+//
+// A path the config lists under `skip` was seen and turned down on purpose, so
+// it is not reported again. The reason lives in the config next to the path. A
+// skip whose path no longer exists upstream is stale config and fails the sync:
+// the decision it records has nothing left to apply to.
 function scanUnvendored(plugin, src) {
   const found = []
 
@@ -224,7 +229,14 @@ function scanUnvendored(plugin, src) {
     found.push(entry.isDirectory() ? `${entry.name}/` : entry.name)
   }
 
-  return found.map((item) => ({ plugin: plugin.name, item }))
+  const skipped = new Set((plugin.skip ?? []).map((s) => s.path))
+  for (const skip of skipped) {
+    if (!found.includes(skip)) {
+      problems.push(`${plugin.name}: skip entry no longer matches an unvendored upstream path: ${skip}`)
+    }
+  }
+
+  return found.filter((item) => !skipped.has(item)).map((item) => ({ plugin: plugin.name, item }))
 }
 
 // Pulls the one-line skill descriptions out of the upstream plugin README's
@@ -301,7 +313,7 @@ function writeReadmeCatalog(catalog) {
       const agents = plugin.agents?.length ?? 0
       // Counts live in the generated region so they cannot drift from the
       // allowlist the way a hand-written summary table would.
-      const counts = [`${skills.length} skills`, agents ? `${agents} subagents` : null].filter(Boolean).join(' · ')
+      const counts = [`${skills.length} skills`, agents ? `${agents} subagent${agents === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')
       return [
         `### \`${plugin.name}\` · ${counts}`,
         '',

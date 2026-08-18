@@ -24,7 +24,6 @@
 ```
 /plugin marketplace add ArchitektApx/cursor-skills-for-claude
 /plugin install cursor-team-kit@cursor-skills-for-claude
-/plugin install thermos@cursor-skills-for-claude
 ```
 
 ### Everything else
@@ -33,9 +32,8 @@
 npx skills@latest add ArchitektApx/cursor-skills-for-claude
 ```
 
-Installs the `cursor-team-kit` skills into every agent it detects. `thermos` is
-Claude Code only, since it runs as subagents and `npx skills` installs skills
-only.
+Installs the same skills into every agent it detects. Subagents are Claude
+Code only, since `npx skills` installs skills only.
 
 ---
 
@@ -43,7 +41,7 @@ only.
 
 <!-- skills:start -->
 
-### `cursor-team-kit` · 18 skills · 2 subagents
+### `cursor-team-kit` · 18 skills · 1 subagent
 
 | Skill | Description |
 | :--- | :--- |
@@ -66,21 +64,7 @@ only.
 | `workflow-from-chats` | Extract durable working preferences from chats into skills, rules, or docs |
 | `thermo-nuclear-code-quality-review` | Run an unusually strict maintainability review (code-judo, 1k-line rule, spaghetti, boundaries) |
 
-### `thermos` · 3 skills · 2 subagents
-
-| Skill | Description |
-| :--- | :--- |
-| `thermo-nuclear-review` | Deep branch audit (bugs, breakages, security, devex, feature-gate leaks) |
-| `thermo-nuclear-code-quality-review` | Strict maintainability audit (code-judo, 1k-line rule, spaghetti, boundaries) |
-| `thermos` | Run both review subagents in parallel and synthesize findings |
-
 <!-- skills:end -->
-
-> [!TIP]
-> `thermo-nuclear-code-quality-review` ships in both plugins because it is in
-> both upstream plugins. Claude Code namespaces them per plugin.
-
----
 
 ## 🔀 Changes from upstream
 
@@ -93,6 +77,12 @@ Skill content is copied verbatim, with two exceptions:
 
 Upstream `rules/`, `hooks/`, `automations/` and `mcp.json` are not packaged. No
 skill here references them.
+
+Not packaged either: the upstream `thermos` plugin and the cursor-team-kit
+`thermo-nuclear-code-quality-review` subagent. Those agents load their rubric
+from a skill that Claude Code hides from agents (`disable-model-invocation`),
+so they would run a weaker fallback while claiming the full audit. The
+`thermo-nuclear-code-quality-review` skill itself is self-contained and ships.
 
 ---
 

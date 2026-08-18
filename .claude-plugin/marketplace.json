@@ -12,11 +12,6 @@
       "name": "cursor-team-kit",
       "source": "./plugins/cursor-team-kit",
       "description": "Internal team workflows for CI, code review, shipping, local automation, and verification. Repackaged from cursor/plugins."
-    },
-    {
-      "name": "thermos",
-      "source": "./plugins/thermos",
-      "description": "Thermo-nuclear branch review: deep security and correctness audits, harsh code-quality rubrics, and parallel review subagents. Repackaged from cursor/plugins."
     }
   ]
 }
