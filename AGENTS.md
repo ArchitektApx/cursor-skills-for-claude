@@ -70,6 +70,12 @@ node scripts/sync.mjs --verify   offline checks, no network
 `sync.yml` runs the first daily and opens a PR when output differs. `verify.yml`
 runs the second on every push and pull request.
 
+Most upstream commits touch nothing this repository vendors and move only
+`.sync-state.json`, so the sync opens a PR only when generated content changed
+or upstream grew a skill the allowlist does not cover. The state file then stays
+on the last content sync, which widens the commit range the next report lists
+and changes nothing else.
+
 Every condition the script reports is a decision for a human: upstream content
 changed in a way the config no longer describes. Fix the config, or accept the
 upstream change deliberately. Keep the sync failing on anything it fails on

@@ -70,6 +70,11 @@ function sync() {
     fail('Mirror verification failed')
 
     fs.writeFileSync(REPORT_FILE, report(upstream, previous, extras))
+    // The workflow decides whether a pull request is worth opening, and an
+    // unallowlisted upstream skill is reason enough on its own. Reported as a
+    // step output rather than left for the workflow to grep out of the report,
+    // so rewording the report cannot silently drop the signal.
+    emitStepOutput('extras', extras.length)
     console.log(`\nSynced ${CONFIG.plugins.length} plugins from ${upstream.commit.slice(0, 12)}.`)
     if (extras.length) {
       console.log(`\n${extras.length} upstream skill(s) not in the allowlist:`)
@@ -446,6 +451,12 @@ function report(upstream, previous, extras) {
   }
 
   return lines.join('\n')
+}
+
+function emitStepOutput(name, value) {
+  const file = process.env.GITHUB_OUTPUT
+  if (!file) return
+  fs.appendFileSync(file, `${name}=${value}\n`)
 }
 
 function tryGit(cwd, args) {

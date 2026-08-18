@@ -36,13 +36,34 @@ jobs:
           node-version: 22
 
       - name: Regenerate from upstream
+        id: sync
         run: node scripts/sync.mjs
+
+      # Most upstream commits touch nothing this repository vendors, and leave
+      # only .sync-state.json rewritten. A pull request for that is noise, so
+      # one is opened only when generated content moved or upstream grew a skill
+      # the allowlist does not cover. The state file then stays on the last
+      # content sync, which only widens the commit range the next report shows.
+      - name: Decide whether the change is worth a pull request
+        id: changed
+        env:
+          # Via the environment, never interpolated into the script body.
+          EXTRAS: ${{ steps.sync.outputs.extras }}
+        run: |
+          content=$(git status --porcelain -- . ':!.sync-state.json')
+          if [ -n "$content" ] || [ "${EXTRAS:-0}" != "0" ]; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "Only .sync-state.json changed; no pull request opened."
+          fi
 
       # The report is passed by path, never through GITHUB_OUTPUT. It embeds
       # upstream commit subjects, and a commit subject that happened to match a
       # heredoc delimiter would otherwise let upstream write arbitrary step
       # outputs.
       - name: Open pull request
+        if: steps.changed.outputs.open == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           branch: sync/upstream
